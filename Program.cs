@@ -12,31 +12,31 @@ namespace GeniyIdiotConsoleApp
         static void Main()
         {
             var newResultOfGames = new ResultOfGames();            
+            
             Console.WriteLine(@"Добро пожаловать в игру ""Гений-Идиот""");
             var user = new User("", "", "");
             user.СreatingFirstNameLastNamePatronomic();
             do
             {
                 var newGame = new Game();
+                var newListQuestionsAnswers = new ListQuestionsAnswers();
                 int countRightAnswers = 0;
-                var listWithQuestionNumbers = newGame.RandomNumberQuestions(newGame.NumberOfQuestions);
+                var listWithQuestionNumbers = newGame.RandomNumberQuestions(newListQuestionsAnswers.NumberOfQuestions);
 
-                for (int i = 0; i < newGame.NumberOfQuestions; i++)
+                for (int i = 0; i < newListQuestionsAnswers.NumberOfQuestions; i++)
                 {
                     Console.WriteLine("Вопрос №" + (i + 1));
-                    newGame.ShowQuestion(listWithQuestionNumbers[i]);
-                    bool IsCorrectAnswer = newGame.CheckAnswer(listWithQuestionNumbers[i]);
+                    newListQuestionsAnswers.ShowQuestion(listWithQuestionNumbers[i]);
+                    bool IsCorrectAnswer = newListQuestionsAnswers.CheckAnswer(listWithQuestionNumbers[i]);
 
                     if (IsCorrectAnswer)
                     {
                         countRightAnswers++;
                     }
                 }
-                newResultOfGames.AddResult(user.Lastname, user.Firstname, user.Patronomic, countRightAnswers, newGame.Diagnose(countRightAnswers));
-                
-                Console.WriteLine("Количество правильных ответов: " + countRightAnswers);
-                Console.WriteLine($"{user.Firstname}, ваш диагноз: " + newGame.Diagnose(countRightAnswers));
 
+                newResultOfGames.AddResult(user.Lastname, user.Firstname, user.Patronomic, countRightAnswers, newGame.Diagnose(countRightAnswers, newListQuestionsAnswers.NumberOfQuestions));
+                               
                 Console.WriteLine($"Хотите попробовать еще раз? (Введите ДА или НЕТ для завершения игры)");
 
             } while (AnswerToTheQuestionIsYesOrNo(Console.ReadLine()));
@@ -72,16 +72,18 @@ namespace GeniyIdiotConsoleApp
                 return result;
             }
         }
-
         public class ResultOfGames
         {
-            public string FileWithLogs { get; } = @"log.txt";
+            public string FileWithLogs { get; } = @"..\..\..\log.txt"; //поднимается на 3 шага выше туда где лежит файл из проекта, как сделать грамотно?
             WorkWithFileSystem workWithFileSistem = new WorkWithFileSystem();
 
             public void AddResult(string lastname, string firstname, string patronomic, int countRightAnswers, string diagnose)
             {                
                 var formatSave = $"|{lastname,15}|{firstname,15}|{patronomic,15}|{countRightAnswers,21}|{diagnose,10}|";
                 workWithFileSistem.WriteLineToFile(FileWithLogs, formatSave);
+
+                Console.WriteLine("Количество правильных ответов: " + countRightAnswers);
+                Console.WriteLine($"{firstname}, ваш диагноз: " + diagnose);
             }
 
             public void HistoryOfResults()
@@ -97,60 +99,46 @@ namespace GeniyIdiotConsoleApp
                 }
             }
         }
-        public class QuestionsAnswers
+        public class QuestionAnswer
         {
             public int Index { get; }
             public string Question { get; }
             public int Answer { get; }
-
-            public QuestionsAnswers(int index, string question, int answer)
+            
+            public QuestionAnswer(int index, string question, int answer)
             {
                 Index = index;
                 Question = question;
                 Answer = answer;
             }
         }
-        public class User
+        public class ListQuestionsAnswers
         {
-            public string Lastname { get; set; }
-            public string Firstname { get; set; }
-            public string Patronomic { get; set; }
-            public User(string lastname, string firstname, string patronomic)
-            {
-                Lastname = lastname;
-                Firstname = firstname;
-                Patronomic = patronomic;
-            }
-            public void СreatingFirstNameLastNamePatronomic()
-            {
-                Console.WriteLine();
-                Console.Write("Введите фамилию: ");
-                Lastname = Console.ReadLine(); 
-                Console.Write("Введите имя: ");
-                Firstname = Console.ReadLine();
-                Console.Write("Введите отчество: ");
-                Patronomic = Console.ReadLine();
-            }
-        }
-        static bool AnswerToTheQuestionIsYesOrNo(string answer)
-        {
-            return answer.ToLower() == "да";
-        }
-        public class Game
-        {
-            public QuestionsAnswers[] listQuestionsAnswers;
-            public int NumberOfQuestions { get; }
+            public string FileWithQuestionsAnswers { get; } = @"..\..\..\QuestionsAnswers.txt"; //так же как с логами
 
-            public Game()
+            WorkWithFileSystem workWithFileSistem = new WorkWithFileSystem();
+
+            public QuestionAnswer[] listQuestionsAnswers;
+            public int NumberOfQuestions { get; }
+            
+            public ListQuestionsAnswers()
             {
-                listQuestionsAnswers = new QuestionsAnswers[5]
+                var arrayOfLinesFromTheFile = new List<string[]>();
+                List<string> linesFromTheFile = workWithFileSistem.ReadToFile(FileWithQuestionsAnswers);
+                foreach (var str in linesFromTheFile)
                 {
-                    new QuestionsAnswers(0, "Сколько будет два плюс два умноженное на два?", 6),
-                    new QuestionsAnswers(1, "Бревно нужно распилить на 10 частей. Сколько распилов нужно сделать?", 9),
-                    new QuestionsAnswers(2, "На двух руках 10 пальцев. Сколько пальцев на 5 руках?", 25),
-                    new QuestionsAnswers(3, "Укол делают каждые полчаса. Сколько нужно минут, чтобы сделать три укола?", 60),
-                    new QuestionsAnswers(4, "Пять свечей горело, две потухли. Сколько свечей осталось?", 2)
-                };
+                    string[] elements = str.Split('=');
+                    arrayOfLinesFromTheFile.Add(elements);
+                }
+
+                listQuestionsAnswers = new QuestionAnswer[arrayOfLinesFromTheFile.Count];
+                for (int i = 0; i < arrayOfLinesFromTheFile.Count; i++)
+                {
+                    int index = Convert.ToInt32(arrayOfLinesFromTheFile[i][0]);
+                    string question = arrayOfLinesFromTheFile[i][1];
+                    int answer = Convert.ToInt32(arrayOfLinesFromTheFile[i][2]);
+                    listQuestionsAnswers[i] = new QuestionAnswer (index, question, answer);
+                }
                 NumberOfQuestions = listQuestionsAnswers.Length;
             }
             public void ShowQuestion(int numberQuestion)
@@ -188,11 +176,51 @@ namespace GeniyIdiotConsoleApp
                     }
                 }
                 return result;
+            }            
+            public void AddQuestionsAnswers() //пока просто для тестов
+            {
+                int index = NumberOfQuestions + 1;
+                Console.Write("Введите новый вопрос для игры: ");
+                string question = Console.ReadLine();
+                Console.Write("Введите ответ для нового вопроса: ");
+                string answer = Console.ReadLine();                
+
+                workWithFileSistem.WriteLineToFile(FileWithQuestionsAnswers, $"{index}={question}={answer}");
             }
-            public string Diagnose(int countRightAnswers) 
+            
+        }
+        public class User
+        {
+            public string Lastname { get; set; }
+            public string Firstname { get; set; }
+            public string Patronomic { get; set; }
+            public User(string lastname, string firstname, string patronomic)
+            {
+                Lastname = lastname;
+                Firstname = firstname;
+                Patronomic = patronomic;
+            }
+            public void СreatingFirstNameLastNamePatronomic()
+            {
+                Console.WriteLine();
+                Console.Write("Введите фамилию: ");
+                Lastname = Console.ReadLine(); 
+                Console.Write("Введите имя: ");
+                Firstname = Console.ReadLine();
+                Console.Write("Введите отчество: ");
+                Patronomic = Console.ReadLine();
+            }
+        }
+        static bool AnswerToTheQuestionIsYesOrNo(string answer)
+        {
+            return answer.ToLower() == "да";
+        }
+        public class Game
+        {            
+            public string Diagnose(int countRightAnswers, int numberOfQuestions) 
             {
                 string diagnose;                
-                var percentageOfCorrectAnswers = Math.Round((double)countRightAnswers / NumberOfQuestions*100);
+                var percentageOfCorrectAnswers = Math.Round((double)countRightAnswers / numberOfQuestions * 100);
 
                 if (percentageOfCorrectAnswers == 0)
                 { diagnose = "кретин"; }
