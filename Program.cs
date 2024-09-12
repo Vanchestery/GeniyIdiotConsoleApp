@@ -102,7 +102,7 @@ namespace GeniyIdiotConsoleApp
             public string Diagnose(int countRightAnswers) 
             {
                 string diagnose;                
-                double percentageOfCorrectAnswers = Math.Round((double)countRightAnswers / NumberOfQuestions*100);
+                var percentageOfCorrectAnswers = Math.Round((double)countRightAnswers / NumberOfQuestions*100);
 
                 if (percentageOfCorrectAnswers == 0)
                 { diagnose = "кретин"; }
@@ -149,7 +149,7 @@ namespace GeniyIdiotConsoleApp
             {
                 var newGame = new Game();
                 int countRightAnswers = 0;
-                List <int> listWithQuestionNumbers = newGame.RandomNumberQuestions(newGame.NumberOfQuestions);
+                var listWithQuestionNumbers = newGame.RandomNumberQuestions(newGame.NumberOfQuestions);
 
                 for (int i = 0; i < newGame.NumberOfQuestions; i++)
                 {
@@ -163,7 +163,7 @@ namespace GeniyIdiotConsoleApp
                     }
                 }
                 
-                string formatSave = $"|{user.Lastname,15}|{user.Firstname, 15}|{user.Patronomic, 15}|{countRightAnswers, 21}|{newGame.Diagnose(countRightAnswers),10}|";
+                var formatSave = $"|{user.Lastname,15}|{user.Firstname, 15}|{user.Patronomic, 15}|{countRightAnswers, 21}|{newGame.Diagnose(countRightAnswers),10}|";
                 using (var writer = new StreamWriter(path, true, Encoding.Default))
                 {
                     writer.WriteLine(formatSave);
