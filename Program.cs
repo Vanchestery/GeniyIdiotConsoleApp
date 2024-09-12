@@ -1,12 +1,102 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Text;
+using static GeniyIdiotConsoleApp.Program;
 
 namespace GeniyIdiotConsoleApp
 {
     internal class Program
     {
+        static void Main()
+        {
+            var newResultOfGames = new ResultOfGames();            
+            Console.WriteLine(@"Добро пожаловать в игру ""Гений-Идиот""");
+            var user = new User("", "", "");
+            user.СreatingFirstNameLastNamePatronomic();
+            do
+            {
+                var newGame = new Game();
+                int countRightAnswers = 0;
+                var listWithQuestionNumbers = newGame.RandomNumberQuestions(newGame.NumberOfQuestions);
+
+                for (int i = 0; i < newGame.NumberOfQuestions; i++)
+                {
+                    Console.WriteLine("Вопрос №" + (i + 1));
+                    newGame.ShowQuestion(listWithQuestionNumbers[i]);
+                    bool IsCorrectAnswer = newGame.CheckAnswer(listWithQuestionNumbers[i]);
+
+                    if (IsCorrectAnswer)
+                    {
+                        countRightAnswers++;
+                    }
+                }
+                newResultOfGames.AddResult(user.Lastname, user.Firstname, user.Patronomic, countRightAnswers, newGame.Diagnose(countRightAnswers));
+                
+                Console.WriteLine("Количество правильных ответов: " + countRightAnswers);
+                Console.WriteLine($"{user.Firstname}, ваш диагноз: " + newGame.Diagnose(countRightAnswers));
+
+                Console.WriteLine($"Хотите попробовать еще раз? (Введите ДА или НЕТ для завершения игры)");
+
+            } while (AnswerToTheQuestionIsYesOrNo(Console.ReadLine()));
+
+            Console.WriteLine($"Хотите посмотреть таблицу с результатами? (Введите ДА или НЕТ)");
+            if (AnswerToTheQuestionIsYesOrNo(Console.ReadLine()))
+            {
+                newResultOfGames.HistoryOfResults();
+            }
+        }
+
+        public class WorkWithFileSystem
+        {            
+            public void WriteLineToFile(string path, string formatSave)
+            {
+                using (var writer = new StreamWriter(path, true, Encoding.Default))
+                {
+                    writer.WriteLine(formatSave);
+                }
+            }
+
+            public List<string> ReadToFile(string path)
+            {
+                var result = new List<string>();
+                using (var read = new StreamReader(path, Encoding.Default))
+                {
+                    string line;
+                    while ((line = read.ReadLine()) != null)
+                    {
+                        result.Add(line);
+                    }
+                }
+                return result;
+            }
+        }
+
+        public class ResultOfGames
+        {
+            public string FileWithLogs { get; } = @"log.txt";
+            WorkWithFileSystem workWithFileSistem = new WorkWithFileSystem();
+
+            public void AddResult(string lastname, string firstname, string patronomic, int countRightAnswers, string diagnose)
+            {                
+                var formatSave = $"|{lastname,15}|{firstname,15}|{patronomic,15}|{countRightAnswers,21}|{diagnose,10}|";
+                workWithFileSistem.WriteLineToFile(FileWithLogs, formatSave);
+            }
+
+            public void HistoryOfResults()
+            {                
+                Console.WriteLine(new string('-', 82));
+                Console.WriteLine($"|{"Фамилия",15}|{"Имя",15}|{"Отчество",15}|{"Кол-во верных ответов",21}|{"Диагноз",10}|");
+                Console.WriteLine(new string('-', 82));
+                List<string> forOutput = new List<string>();
+                forOutput = workWithFileSistem.ReadToFile(FileWithLogs);
+                foreach (var str in forOutput)
+                {
+                    Console.WriteLine(str);
+                }
+            }
+        }
         public class QuestionsAnswers
         {
             public int Index { get; }
@@ -137,63 +227,6 @@ namespace GeniyIdiotConsoleApp
                 return result;
             }            
         }                
-
-
-        static void Main()
-        {
-            string path = @"log.txt";
-            Console.WriteLine(@"Добро пожаловать в игру ""Гений-Идиот""");
-            var user = new User("", "", "");
-            user.СreatingFirstNameLastNamePatronomic();
-            do
-            {
-                var newGame = new Game();
-                int countRightAnswers = 0;
-                var listWithQuestionNumbers = newGame.RandomNumberQuestions(newGame.NumberOfQuestions);
-
-                for (int i = 0; i < newGame.NumberOfQuestions; i++)
-                {
-                    Console.WriteLine("Вопрос №" + (i + 1));
-                    newGame.ShowQuestion(listWithQuestionNumbers[i]);
-                    bool IsCorrectAnswer = newGame.CheckAnswer(listWithQuestionNumbers[i]);
-                                                                                           
-                    if (IsCorrectAnswer)
-                    {
-                        countRightAnswers++;
-                    }
-                }
-                
-                var formatSave = $"|{user.Lastname,15}|{user.Firstname, 15}|{user.Patronomic, 15}|{countRightAnswers, 21}|{newGame.Diagnose(countRightAnswers),10}|";
-                using (var writer = new StreamWriter(path, true, Encoding.Default))
-                {
-                    writer.WriteLine(formatSave);
-                }
-                
-                Console.WriteLine("Количество правильных ответов: " + countRightAnswers);
-                Console.WriteLine($"{user.Firstname}, ваш диагноз: " + newGame.Diagnose(countRightAnswers));
-
-                Console.WriteLine($"Хотите попробовать еще раз? (Введите ДА или НЕТ для завершения игры)");
-
-            } while (AnswerToTheQuestionIsYesOrNo(Console.ReadLine()));
-
-            Console.WriteLine($"Хотите посмотреть таблицу с результатами? (Введите ДА или НЕТ)");
-            if (AnswerToTheQuestionIsYesOrNo(Console.ReadLine()))
-            {
-                Console.WriteLine(new string('-', 82));
-                Console.WriteLine($"|{"Фамилия",15}|{"Имя",15}|{"Отчество",15}|{"Кол-во верных ответов",21}|{"Диагноз",10}|");
-                Console.WriteLine(new string('-', 82));
-                using (var read = new StreamReader(path, Encoding.Default))
-                {
-                    string line;
-                    while ((line = read.ReadLine()) != null)
-                    {
-                        Console.WriteLine(line);
-                    }
-                }
-
-            }
-        }
-
     }
 }
 
