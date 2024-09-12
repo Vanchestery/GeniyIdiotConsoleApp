@@ -42,7 +42,7 @@ namespace GeniyIdiotConsoleApp
                 Patronomic = Console.ReadLine();
             }
         }
-        static bool AnswerToTheQuestionIsYesOrNo(string answer) // Надо дать методу более конкретное имя. Имя IsYes() может подходить много к чему. //поправил
+        static bool AnswerToTheQuestionIsYesOrNo(string answer)
         {
             return answer.ToLower() == "да";
         }
@@ -65,7 +65,7 @@ namespace GeniyIdiotConsoleApp
             }
             public void ShowQuestion(int numberQuestion)
             {
-                foreach (QuestionsAnswers questionsAnswers in listQuestionsAnswers)
+                foreach (var questionsAnswers in listQuestionsAnswers)
                 {
                     if (numberQuestion == questionsAnswers.Index)
                     {
@@ -89,7 +89,7 @@ namespace GeniyIdiotConsoleApp
                 } while (!isNumeric);
 
                 bool result = false;
-                foreach (QuestionsAnswers questionsAnswers in listQuestionsAnswers)
+                foreach (var questionsAnswers in listQuestionsAnswers)
                 {
                     if (numberQuestion == questionsAnswers.Index)
                     {
@@ -102,7 +102,7 @@ namespace GeniyIdiotConsoleApp
             public string Diagnose(int countRightAnswers) 
             {
                 string diagnose;                
-                double percentageOfCorrectAnswers = Math.Round((double)countRightAnswers / NumberOfQuestions*100);
+                var percentageOfCorrectAnswers = Math.Round((double)countRightAnswers / NumberOfQuestions*100);
 
                 if (percentageOfCorrectAnswers == 0)
                 { diagnose = "кретин"; }
@@ -122,8 +122,8 @@ namespace GeniyIdiotConsoleApp
 
             public List<int> RandomNumberQuestions(int numberQuestion) 
             {
-                List<int> result = new List<int>();
-                Random random = new Random();
+                var result = new List<int>();
+                var random = new Random();
                 int nextRandom;
                 for (int i = 1; i <= numberQuestion;)
                 {
@@ -141,15 +141,15 @@ namespace GeniyIdiotConsoleApp
 
         static void Main()
         {
-            string path = @"log.txt"; // Ответ: Проблема в том, что у пользователя может не быть диска D:\   //поправил
+            string path = @"log.txt";
             Console.WriteLine(@"Добро пожаловать в игру ""Гений-Идиот""");
-            User user = new User("", "", "");
+            var user = new User("", "", "");
             user.СreatingFirstNameLastNamePatronomic();
             do
             {
-                Game newGame = new Game();
+                var newGame = new Game();
                 int countRightAnswers = 0;
-                List <int> listWithQuestionNumbers = newGame.RandomNumberQuestions(newGame.NumberOfQuestions);
+                var listWithQuestionNumbers = newGame.RandomNumberQuestions(newGame.NumberOfQuestions);
 
                 for (int i = 0; i < newGame.NumberOfQuestions; i++)
                 {
@@ -163,8 +163,8 @@ namespace GeniyIdiotConsoleApp
                     }
                 }
                 
-                string formatSave = $"|{user.Lastname,15}|{user.Firstname, 15}|{user.Patronomic, 15}|{countRightAnswers, 21}|{newGame.Diagnose(countRightAnswers),10}|";
-                using (StreamWriter writer = new StreamWriter(path, true, Encoding.Default))
+                var formatSave = $"|{user.Lastname,15}|{user.Firstname, 15}|{user.Patronomic, 15}|{countRightAnswers, 21}|{newGame.Diagnose(countRightAnswers),10}|";
+                using (var writer = new StreamWriter(path, true, Encoding.Default))
                 {
                     writer.WriteLine(formatSave);
                 }
@@ -182,7 +182,7 @@ namespace GeniyIdiotConsoleApp
                 Console.WriteLine(new string('-', 82));
                 Console.WriteLine($"|{"Фамилия",15}|{"Имя",15}|{"Отчество",15}|{"Кол-во верных ответов",21}|{"Диагноз",10}|");
                 Console.WriteLine(new string('-', 82));
-                using (StreamReader read = new StreamReader(path, Encoding.Default))
+                using (var read = new StreamReader(path, Encoding.Default))
                 {
                     string line;
                     while ((line = read.ReadLine()) != null)
