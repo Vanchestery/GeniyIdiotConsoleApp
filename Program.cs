@@ -11,14 +11,13 @@ namespace GeniyIdiotConsoleApp
     {
         static void Main()
         {
-            var newResultOfGames = new GameManager();            
+            var newGame = new GameManager();            
             
             Console.WriteLine(@"Добро пожаловать в игру ""Гений-Идиот""");
             var user = new User("", "", "");
             user.FullName();
             do
-            {
-                var newGame = new Game();
+            {                
                 var newListQuestionsAnswers = new QuestionRepository();
                 int countRightAnswers = 0;
                 var listWithQuestionNumbers = newGame.RandomNumberQuestions(newListQuestionsAnswers.NumberOfQuestions);
@@ -35,7 +34,7 @@ namespace GeniyIdiotConsoleApp
                     }
                 }
 
-                newResultOfGames.AddResult(user.Lastname, user.Firstname, user.Patronomic, countRightAnswers, newGame.Diagnose(countRightAnswers, newListQuestionsAnswers.NumberOfQuestions));
+                newGame.AddResult(user.Lastname, user.Firstname, user.Patronomic, countRightAnswers, newGame.Diagnose(countRightAnswers, newListQuestionsAnswers.NumberOfQuestions));
                                
                 Console.WriteLine($"Хотите попробовать еще раз? (Введите ДА или НЕТ для завершения игры)");
 
@@ -44,7 +43,7 @@ namespace GeniyIdiotConsoleApp
             Console.WriteLine($"Хотите посмотреть таблицу с результатами? (Введите ДА или НЕТ)");
             if (RepeatTest(Console.ReadLine()))
             {
-                newResultOfGames.HistoryOfResults();
+                newGame.HistoryOfResults();
             }
         }
 
@@ -79,8 +78,8 @@ namespace GeniyIdiotConsoleApp
         }
         public class GameManager
         {
-            public string FileWithLogs { get; } = Properties.Resources.log; //ссылка на файл
-            FileManager workWithFileSistem = new FileManager();
+            public string FileWithLogs { get; } = @"..\..\..\log.txt"; //!!!!!!вытаскивает содержимое файла если использовать Properties.Resources.log;
+            FileManager workWithFileSistem = new FileManager();        //надо переписывать код под неё
 
             public void AddResult(string lastname, string firstname, string patronomic, int countRightAnswers, string diagnose)
             {                
@@ -109,6 +108,44 @@ namespace GeniyIdiotConsoleApp
                 workWithFileSistem.CreateFile(FileWithLogs);
             }
 
+            public string Diagnose(int countRightAnswers, int numberOfQuestions)
+            {
+                string diagnose;
+                var percentageOfCorrectAnswers = Math.Round((double)countRightAnswers / numberOfQuestions * 100);
+
+                if (percentageOfCorrectAnswers == 0)
+                { diagnose = "кретин"; }
+                else if (percentageOfCorrectAnswers > 0 && percentageOfCorrectAnswers <= 20)
+                { diagnose = "идиот"; }
+                else if (percentageOfCorrectAnswers > 20 && percentageOfCorrectAnswers <= 40)
+                { diagnose = "дурак"; }
+                else if (percentageOfCorrectAnswers > 40 && percentageOfCorrectAnswers <= 60)
+                { diagnose = "нормальный"; }
+                else if (percentageOfCorrectAnswers > 60 && percentageOfCorrectAnswers <= 80)
+                { diagnose = "талант"; }
+                else
+                { diagnose = "гений"; }
+
+                return diagnose;
+            }
+
+            public List<int> RandomNumberQuestions(int numberQuestion)
+            {
+                var result = new List<int>();
+                var random = new Random();
+                int nextRandom;
+                for (int i = 1; i <= numberQuestion;)
+                {
+                    nextRandom = random.Next(numberQuestion);
+                    if (!result.Contains(nextRandom))
+                    {
+                        result.Add(nextRandom);
+                        i++;
+                    }
+                }
+                return result;
+            }
+
         }
         public class QuestionAnswer
         {
@@ -125,9 +162,9 @@ namespace GeniyIdiotConsoleApp
         }
         public class QuestionRepository
         {
-            public string FileWithQuestionsAnswers { get; } = Properties.Resources.QuestionsAnswers;
-
-            FileManager workWithFileSistem = new FileManager();
+            public string FileWithQuestionsAnswers { get; } = @"..\..\..\QuestionsAnswers.txt";//!!!!!!вытаскивает содержимое файла если использовать Properties.Resources.QuestionsAnswers;
+                                                                                               //надо переписывать код под неё
+            FileManager workWithFileSistem = new FileManager();                                              
 
             public QuestionAnswer[] listQuestionsAnswers;
             public int NumberOfQuestions { get; }
@@ -225,47 +262,7 @@ namespace GeniyIdiotConsoleApp
         static bool RepeatTest(string answer)
         {
             return answer.ToLower() == "да";
-        }
-        public class Game
-        {            
-            public string Diagnose(int countRightAnswers, int numberOfQuestions) 
-            {
-                string diagnose;                
-                var percentageOfCorrectAnswers = Math.Round((double)countRightAnswers / numberOfQuestions * 100);
-
-                if (percentageOfCorrectAnswers == 0)
-                { diagnose = "кретин"; }
-                else if (percentageOfCorrectAnswers >0&& percentageOfCorrectAnswers<=20)
-                { diagnose = "идиот"; }
-                else if (percentageOfCorrectAnswers > 20 && percentageOfCorrectAnswers <= 40)
-                { diagnose = "дурак"; }
-                else if (percentageOfCorrectAnswers > 40 && percentageOfCorrectAnswers <= 60)
-                { diagnose = "нормальный"; }
-                else if (percentageOfCorrectAnswers > 60 && percentageOfCorrectAnswers <= 80)
-                { diagnose = "талант"; }
-                else
-                { diagnose = "гений"; }
-
-                return diagnose;
-            }
-
-            public List<int> RandomNumberQuestions(int numberQuestion) 
-            {
-                var result = new List<int>();
-                var random = new Random();
-                int nextRandom;
-                for (int i = 1; i <= numberQuestion;)
-                {
-                    nextRandom = random.Next(numberQuestion);
-                    if (!result.Contains(nextRandom))
-                    {
-                        result.Add(nextRandom);
-                        i++;
-                    }
-                }
-                return result;
-            }            
-        }                
+        }                        
     }
 }
 
