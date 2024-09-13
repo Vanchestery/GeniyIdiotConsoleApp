@@ -11,15 +11,15 @@ namespace GeniyIdiotConsoleApp
     {
         static void Main()
         {
-            var newResultOfGames = new ResultOfGames();            
+            var newResultOfGames = new GameManager();            
             
             Console.WriteLine(@"Добро пожаловать в игру ""Гений-Идиот""");
             var user = new User("", "", "");
-            user.СreatingFirstNameLastNamePatronomic();
+            user.FullName();
             do
             {
                 var newGame = new Game();
-                var newListQuestionsAnswers = new ListQuestionsAnswers();
+                var newListQuestionsAnswers = new QuestionRepository();
                 int countRightAnswers = 0;
                 var listWithQuestionNumbers = newGame.RandomNumberQuestions(newListQuestionsAnswers.NumberOfQuestions);
 
@@ -39,18 +39,18 @@ namespace GeniyIdiotConsoleApp
                                
                 Console.WriteLine($"Хотите попробовать еще раз? (Введите ДА или НЕТ для завершения игры)");
 
-            } while (AnswerToTheQuestionIsYesOrNo(Console.ReadLine()));
+            } while (RepeatTest(Console.ReadLine()));
 
             Console.WriteLine($"Хотите посмотреть таблицу с результатами? (Введите ДА или НЕТ)");
-            if (AnswerToTheQuestionIsYesOrNo(Console.ReadLine()))
+            if (RepeatTest(Console.ReadLine()))
             {
                 newResultOfGames.HistoryOfResults();
             }
         }
 
-        public class WorkWithFileSystem
+        public class FileManager
         {            
-            public void WriteLineToFile(string path, string formatSave)
+            public void WriteToFile(string path, string formatSave)
             {
                 using (var writer = new StreamWriter(path, true, Encoding.Default))
                 {
@@ -58,7 +58,7 @@ namespace GeniyIdiotConsoleApp
                 }
             }
 
-            public List<string> ReadToFile(string path)
+            public List<string> ReadFromFile(string path)
             {
                 var result = new List<string>();
                 using (var read = new StreamReader(path, Encoding.Default))
@@ -77,15 +77,15 @@ namespace GeniyIdiotConsoleApp
                 File.Create(path).Close();
             }
         }
-        public class ResultOfGames
+        public class GameManager
         {
             public string FileWithLogs { get; } = Properties.Resources.log; //ссылка на файл
-            WorkWithFileSystem workWithFileSistem = new WorkWithFileSystem();
+            FileManager workWithFileSistem = new FileManager();
 
             public void AddResult(string lastname, string firstname, string patronomic, int countRightAnswers, string diagnose)
             {                
                 var formatSave = $"|{lastname,15}|{firstname,15}|{patronomic,15}|{countRightAnswers,21}|{diagnose,10}|";
-                workWithFileSistem.WriteLineToFile(FileWithLogs, formatSave);
+                workWithFileSistem.WriteToFile(FileWithLogs, formatSave);
 
                 Console.WriteLine("Количество правильных ответов: " + countRightAnswers);
                 Console.WriteLine($"{firstname}, ваш диагноз: " + diagnose);
@@ -97,17 +97,18 @@ namespace GeniyIdiotConsoleApp
                 Console.WriteLine($"|{"Фамилия",15}|{"Имя",15}|{"Отчество",15}|{"Кол-во верных ответов",21}|{"Диагноз",10}|");
                 Console.WriteLine(new string('-', 82));
                 List<string> forOutput = new List<string>();
-                forOutput = workWithFileSistem.ReadToFile(FileWithLogs);
+                forOutput = workWithFileSistem.ReadFromFile(FileWithLogs);
                 foreach (var str in forOutput)
                 {
                     Console.WriteLine(str);
                 }
             }
 
-            public void CreateHistoryOfResults()//очистить историю логов
+            public void ClearTheGameHistory()//очистить историю логов
             {
                 workWithFileSistem.CreateFile(FileWithLogs);
             }
+
         }
         public class QuestionAnswer
         {
@@ -122,19 +123,19 @@ namespace GeniyIdiotConsoleApp
                 Answer = answer;
             }
         }
-        public class ListQuestionsAnswers
+        public class QuestionRepository
         {
             public string FileWithQuestionsAnswers { get; } = Properties.Resources.QuestionsAnswers;
 
-            WorkWithFileSystem workWithFileSistem = new WorkWithFileSystem();
+            FileManager workWithFileSistem = new FileManager();
 
             public QuestionAnswer[] listQuestionsAnswers;
             public int NumberOfQuestions { get; }
             
-            public ListQuestionsAnswers()
+            public QuestionRepository()
             {
                 var arrayOfLinesFromTheFile = new List<string[]>();
-                List<string> linesFromTheFile = workWithFileSistem.ReadToFile(FileWithQuestionsAnswers);
+                List<string> linesFromTheFile = workWithFileSistem.ReadFromFile(FileWithQuestionsAnswers);
                 foreach (var str in linesFromTheFile)
                 {
                     string[] elements = str.Split('=');
@@ -195,7 +196,7 @@ namespace GeniyIdiotConsoleApp
                 Console.Write("Введите ответ для нового вопроса: ");
                 string answer = Console.ReadLine();                
 
-                workWithFileSistem.WriteLineToFile(FileWithQuestionsAnswers, $"{index}={question}={answer}");
+                workWithFileSistem.WriteToFile(FileWithQuestionsAnswers, $"{index}={question}={answer}");
             }
             
         }
@@ -210,7 +211,7 @@ namespace GeniyIdiotConsoleApp
                 Firstname = firstname;
                 Patronomic = patronomic;
             }
-            public void СreatingFirstNameLastNamePatronomic()
+            public void FullName()
             {
                 Console.WriteLine();
                 Console.Write("Введите фамилию: ");
@@ -221,7 +222,7 @@ namespace GeniyIdiotConsoleApp
                 Patronomic = Console.ReadLine();
             }
         }
-        static bool AnswerToTheQuestionIsYesOrNo(string answer)
+        static bool RepeatTest(string answer)
         {
             return answer.ToLower() == "да";
         }
