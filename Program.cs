@@ -71,10 +71,15 @@ namespace GeniyIdiotConsoleApp
                 }
                 return result;
             }
+
+            public void CreateFile(string path) //очистить файл
+            {
+                File.Create(path).Close();
+            }
         }
         public class ResultOfGames
         {
-            public string FileWithLogs { get; } = @"..\..\..\log.txt"; //поднимается на 3 шага выше туда где лежит файл из проекта, как сделать грамотно?
+            public string FileWithLogs { get; } = Properties.Resources.log; //ссылка на файл
             WorkWithFileSystem workWithFileSistem = new WorkWithFileSystem();
 
             public void AddResult(string lastname, string firstname, string patronomic, int countRightAnswers, string diagnose)
@@ -98,6 +103,11 @@ namespace GeniyIdiotConsoleApp
                     Console.WriteLine(str);
                 }
             }
+
+            public void CreateHistoryOfResults()//очистить историю логов
+            {
+                workWithFileSistem.CreateFile(FileWithLogs);
+            }
         }
         public class QuestionAnswer
         {
@@ -114,7 +124,7 @@ namespace GeniyIdiotConsoleApp
         }
         public class ListQuestionsAnswers
         {
-            public string FileWithQuestionsAnswers { get; } = @"..\..\..\QuestionsAnswers.txt"; //так же как с логами
+            public string FileWithQuestionsAnswers { get; } = Properties.Resources.QuestionsAnswers;
 
             WorkWithFileSystem workWithFileSistem = new WorkWithFileSystem();
 
